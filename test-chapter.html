@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>v4.0 章节系统测试</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Microsoft YaHei', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 20px;
+    }
+    
+    .header h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .header p {
+      font-size: 18px;
+      opacity: 0.9;
+    }
+    
+    #gameCanvas {
+      box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+      border-radius: 10px;
+      background: #000;
+      cursor: pointer;
+    }
+    
+    .controls {
+      margin-top: 20px;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .btn {
+      padding: 12px 30px;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+    }
+    
+    .btn-primary {
+      background: #4CAF50;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #45a049;
+    }
+    
+    .btn-secondary {
+      background: #2196F3;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #0b7dda;
+    }
+    
+    .btn-warning {
+      background: #ff9800;
+      color: white;
+    }
+    
+    .btn-warning:hover {
+      background: #e68900;
+    }
+    
+    .btn-danger {
+      background: #f44336;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #da190b;
+    }
+    
+    .info-panel {
+      margin-top: 20px;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      max-width: 1200px;
+      width: 100%;
+    }
+    
+    .info-panel h3 {
+      margin-bottom: 15px;
+      color: #333;
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+    }
+    
+    .info-card {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+    
+    .info-card h4 {
+      margin-bottom: 10px;
+      color: #4CAF50;
+      font-size: 16px;
+    }
+    
+    .info-card p {
+      margin: 5px 0;
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .info-card .value {
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: none;
+      animation: slideIn 0.3s ease;
+      z-index: 1000;
+    }
+    
+    .toast.show {
+      display: block;
+    }
+    
+    .toast.error {
+      background: #f44336;
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(400px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    pre {
+      background: #f5f5f5;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🎮 v4.0 章节系统测试</h1>
+    <p>测试新的多章节关卡系统</p>
+  </div>
+
+  <canvas id="gameCanvas" width="1200" height="800"></canvas>
+
+  <div class="controls">
+    <button class="btn btn-primary" onclick="toggleChapterSelect()">📋 显示/隐藏章节选择</button>
+    <button class="btn btn-secondary" onclick="showProgress()">📊 查看进度</button>
+    <button class="btn btn-secondary" onclick="showUnlockedPlants()">🌱 查看已解锁植物</button>
+    <button class="btn btn-warning" onclick="completeCurrentLevel()">✓ 模拟完成当前关卡</button>
+    <button class="btn btn-danger" onclick="resetProgress()">🗑️ 重置进度</button>
+  </div>
+
+  <div class="info-panel">
+    <h3>📊 系统信息</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <h4>💰 金币</h4>
+        <p>当前金币: <span class="value" id="currentCoins">0</span></p>
+        <p>累计获得: <span class="value" id="totalCoins">0</span></p>
+      </div>
+      <div class="info-card">
+        <h4>⭐ 星星</h4>
+        <p>总星数: <span class="value" id="totalStars">0</span></p>
+        <p>满星关卡: <span class="value" id="perfectLevels">0</span></p>
+      </div>
+      <div class="info-card">
+        <h4>🎯 进度</h4>
+        <p>当前章节: <span class="value" id="currentChapter">1</span></p>
+        <p>已完成: <span class="value" id="completedLevels">0</span></p>
+      </div>
+      <div class="info-card">
+        <h4>🌱 植物</h4>
+        <p>已解锁: <span class="value" id="unlockedPlants">1</span></p>
+        <p>总植物数: <span class="value">24</span></p>
+      </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+      <h4>📝 操作说明</h4>
+      <p>• 点击章节标签切换不同章节</p>
+      <p>• 点击关卡卡片选择关卡（测试模式会显示关卡信息）</p>
+      <p>• 滚动鼠标滚轮查看更多关卡</p>
+      <p>• 点击"模拟完成当前关卡"可以解锁下一关和植物</p>
+      <p>• 点击"重置进度"可以清空所有进度重新开始</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script type="module">
+    import { chapterSystem } from './ChapterSystem.js';
+    import { ChapterSelect } from './ChapterSelect.js';
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // 当前选择的关卡
+    let currentLevelId = null;
+    
+    // 创建章节选择界面
+    const chapterSelect = new ChapterSelect(canvas, (levelId) => {
+      currentLevelId = levelId;
+      const level = chapterSystem.getLevel(levelId);
+      
+      showToast(`选择关卡: ${level.name}\n僵尸数: ${level.maxZombies}\n金币奖励: ${level.coins}`);
+      
+      // 测试模式：直接显示关卡信息
+      console.log('选择的关卡:', level);
+    });
+    
+    // 显示界面
+    chapterSelect.show();
+    
+    // 渲染循环
+    function render() {
+      ctx.fillStyle = '#87CEEB';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 绘制背景装饰
+      ctx.fillStyle = '#90EE90';
+      ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+      
+      // 如果没有显示章节选择，显示提示
+      if (!chapterSelect.visible) {
+        ctx.fillStyle = '#FFF';
+        ctx.font = 'bold 36px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('点击"显示/隐藏章节选择"查看章节系统', canvas.width / 2, canvas.height / 2);
+        
+        if (currentLevelId) {
+          ctx.font = 'bold 24px Arial';
+          ctx.fillText(`当前选择: ${currentLevelId}`, canvas.width / 2, canvas.height / 2 + 50);
+        }
+      }
+      
+      // 绘制章节选择界面
+      chapterSelect.draw(ctx);
+      
+      requestAnimationFrame(render);
+    }
+    render();
+    
+    // 更新信息面板
+    function updateInfo() {
+      document.getElementById('currentCoins').textContent = chapterSystem.progress.totalCoins;
+      document.getElementById('totalCoins').textContent = chapterSystem.progress.earnedCoins;
+      document.getElementById('totalStars').textContent = chapterSystem.progress.totalStars;
+      document.getElementById('currentChapter').textContent = chapterSystem.progress.currentChapter;
+      document.getElementById('completedLevels').textContent = chapterSystem.progress.completedLevels.length;
+      document.getElementById('unlockedPlants').textContent = chapterSystem.progress.unlockedPlants.length;
+      
+      // 计算满星关卡
+      const perfectLevels = chapterSystem.progress.totalStars / 3;
+      document.getElementById('perfectLevels').textContent = Math.floor(perfectLevels);
+    }
+    
+    // 初始更新
+    updateInfo();
+    
+    // 点击事件
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      chapterSelect.handleClick(x, y);
+      updateInfo();
+    });
+    
+    // 滚轮事件
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      chapterSelect.handleWheel(e.deltaY);
+    }, { passive: false });
+    
+    // 全局函数
+    window.toggleChapterSelect = function() {
+      chapterSelect.toggle();
+      updateInfo();
+    };
+    
+    window.showProgress = function() {
+      console.log('当前进度:', chapterSystem.progress);
+      
+      let message = '📊 当前进度：\n\n';
+      message += `当前章节：第 ${chapterSystem.progress.currentChapter} 章\n`;
+      message += `已完成关卡：${chapterSystem.progress.completedLevels.length} 个\n`;
+      message += `已解锁植物：${chapterSystem.progress.unlockedPlants.length} 种\n`;
+      message += `总金币：${chapterSystem.progress.totalCoins}\n`;
+      message += `总星星：${chapterSystem.progress.totalStars}\n\n`;
+      message += `完成的关卡：\n${chapterSystem.progress.completedLevels.join(', ')}`;
+      
+      alert(message);
+    };
+    
+    window.showUnlockedPlants = function() {
+      const plants = chapterSystem.getUnlockedPlants();
+      console.log('已解锁植物:', plants);
+      
+      let message = '🌱 已解锁植物：\n\n';
+      plants.forEach((plant, index) => {
+        message += `${index + 1}. ${plant}\n`;
+      });
+      
+      alert(message);
+    };
+    
+    window.completeCurrentLevel = function() {
+      if (!currentLevelId) {
+        showToast('请先选择一个关卡！', true);
+        return;
+      }
+      
+      // 模拟完成关卡
+      chapterSystem.completeLevel(currentLevelId, 3, 100);
+      
+      const level = chapterSystem.getLevel(currentLevelId);
+      let message = `✓ 完成关卡: ${level.name}\n\n`;
+      message += `获得金币: ${level.coins + 100}\n`;
+      message += `获得星星: 3⭐\n`;
+      
+      if (level.unlockPlant) {
+        message += `\n🎉 解锁新植物: ${level.unlockName} ${level.unlockIcon}`;
+      }
+      
+      showToast(message);
+      updateInfo();
+      
+      // 检查是否解锁新章节
+      const [chapterId, levelNum] = currentLevelId.split('-').map(Number);
+      const chapter = chapterSystem.getChapter(chapterId);
+      if (levelNum === chapter.levels.length) {
+        setTimeout(() => {
+          showToast(`🎊 完成第 ${chapterId} 章所有关卡！\n解锁第 ${chapterId + 1} 章！`);
+        }, 1000);
+      }
+    };
+    
+    window.resetProgress = function() {
+      if (confirm('确定要重置所有进度吗？此操作不可撤销！')) {
+        chapterSystem.resetProgress();
+        currentLevelId = null;
+        showToast('进度已重置！');
+        updateInfo();
+      }
+    };
+    
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast show' + (isError ? ' error' : '');
+      
+      setTimeout(() => {
+        toast.className = 'toast';
+      }, 3000);
+    }
+    
+    // 监听进度变化
+    setInterval(updateInfo, 1000);
+  </script>
+</body>
+</html>

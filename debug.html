@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物大战僵尸 - 调试版本</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #222; color: #fff; }
+        #console { background: #000; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; }
+        button { padding: 10px 20px; margin: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>植物大战僵尸 - 调试版本</h1>
+    <button id="startBtn">开始游戏</button>
+    <div id="console"></div>
+    <canvas id="gameCanvas" width="900" height="600" style="border: 1px solid white;"></canvas>
+
+    <script type="module">
+        const consoleEl = document.getElementById('console');
+        const startBtn = document.getElementById('startBtn');
+
+        // 自定义控制台输出
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            consoleEl.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        window.log = log;
+
+        let game = null;
+
+        startBtn.addEventListener('click', function() {
+            if (game) {
+                log('游戏已启动');
+                return;
+            }
+
+            try {
+                log('开始初始化游戏...');
+                const canvas = document.getElementById('gameCanvas');
+                game = new Game(canvas);
+
+                log('游戏创建成功');
+                log('初始状态:', game.state);
+
+                // 启动游戏循环
+                game.start();
+
+                log('游戏循环已启动');
+            } catch (error) {
+                log('游戏初始化错误: ' + error.message);
+                log('堆栈: ' + error.stack);
+            }
+        });
+    </script>
+</body>
+</html>

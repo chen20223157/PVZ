@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR>=17 && NR<=26' \"E:\\\\vscodeproject\\\\claudecode_game\\\\Game.js\")",
+      "Bash(node -c \"E:\\\\vscodeproject\\\\claudecode_game\\\\Game.js\")",
+      "Bash(node -c \"E:\\\\vscodeproject\\\\claudecode_game\\\\LoginScreen.js\")",
+      "Bash(node -c \"E:\\\\vscodeproject\\\\claudecode_game\\\\PlantEditor.js\")",
+      "Bash(node -c \"E:\\\\vscodeproject\\\\claudecode_game\\\\PlantTemplates.js\")",
+      "Bash(node -c \"E:\\\\vscodeproject\\\\claudecode_game\\\\Bullet.js\")",
+      "Bash(node check_imports.js)"
+    ]
+  }
+}

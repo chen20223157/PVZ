@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>植物解锁顺序验证</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px;
+      margin: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      color: #667eea;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 36px;
+    }
+    .status {
+      text-align: center;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 2px solid #bee5eb;
+    }
+    .level-card {
+      background: #f8f9fa;
+      padding: 20px;
+      margin: 15px 0;
+      border-radius: 10px;
+      border-left: 5px solid #667eea;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+    .level-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    .level-info {
+      flex: 1;
+    }
+    .level-title {
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    .level-unlock {
+      font-size: 16px;
+      color: #666;
+    }
+    .plant-icon {
+      font-size: 48px;
+      margin-left: 20px;
+    }
+    .button {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 15px 40px;
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px;
+      transition: all 0.3s;
+      border: none;
+      cursor: pointer;
+    }
+    .button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .check-item {
+      padding: 10px;
+      margin: 8px 0;
+      background: #e7f3ff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .check-icon {
+      font-size: 24px;
+      margin-right: 10px;
+    }
+    .highlight {
+      background: #fff3cd;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌱 植物解锁顺序验证</h1>
+    
+    <div class="status success" id="status">
+      ✅ 检查中...
+    </div>
+
+    <div id="results"></div>
+
+    <div class="button-container">
+      <button class="button" onclick="window.location.href='index.html'">
+        🎮 开始游戏
+      </button>
+      <button class="button" onclick="window.location.href='test.html'" style="background: #28a745;">
+        🧪 运行测试
+      </button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { levelSystem } from './LevelSystem.js';
+
+    function createCheckItem(text, isSuccess) {
+      return `
+        <div class="check-item">
+          <span class="check-icon">${isSuccess ? '✅' : '❌'}</span>
+          <span>${text}</span>
+        </div>
+      `;
+    }
+
+    function createLevelCard(level, unlockPlant, icon) {
+      return `
+        <div class="level-card">
+          <div class="level-info">
+            <div class="level-title">第${level}关 - ${getLevelName(level)}</div>
+            <div class="level-unlock">解锁植物: <span class="highlight">${unlockPlant}</span></div>
+          </div>
+          <div class="plant-icon">${icon}</div>
+        </div>
+      `;
+    }
+
+    function getLevelName(levelId) {
+      const level = levelSystem.getLevel(levelId);
+      return level ? level.name.split(' - ')[1] : '未知';
+    }
+
+    function getPlantName(plantId) {
+      const names = {
+        'peashooter': '豌豆射手',
+        'sunflower': '向日葵',
+        'wallnut': '坚果墙',
+        'cherry_bomb': '樱桃炸弹',
+        'snowpea': '寒冰射手'
+      };
+      return names[plantId] || plantId;
+    }
+
+    function verify() {
+      const results = document.getElementById('results');
+      const status = document.getElementById('status');
+      
+      let html = '<h2 style="color: #667eea; margin-top: 30px;">📋 验证结果</h2>';
+      
+      // 检查第1关
+      const level1 = levelSystem.getLevel(1);
+      const check1 = level1.unlockPlant === 'peashooter';
+      html += createCheckItem(
+        `第1关解锁 <span class="highlight">${getPlantName(level1.unlockPlant)}</span> ${check1 ? '(正确 ✓)' : '(错误 ✗)'}`,
+        check1
+      );
+
+      // 检查第2关
+      const level2 = levelSystem.getLevel(2);
+      const check2 = level2.unlockPlant === 'sunflower';
+      html += createCheckItem(
+        `第2关解锁 <span class="highlight">${getPlantName(level2.unlockPlant)}</span> ${check2 ? '(正确 ✓)' : '(错误 ✗)'}`,
+        check2
+      );
+
+      // 检查第3关
+      const level3 = levelSystem.getLevel(3);
+      const check3 = level3.unlockPlant === 'wallnut';
+      html += createCheckItem(
+        `第3关解锁 <span class="highlight">${getPlantName(level3.unlockPlant)}</span> ${check3 ? '(正确 ✓)' : '(错误 ✗)'}`,
+        check3
+      );
+
+      // 显示修改后的顺序
+      html += '<h2 style="color: #667eea; margin-top: 30px;">🎯 新的解锁顺序</h2>';
+      html += createLevelCard(1, '豌豆射手', '🌱');
+      html += createLevelCard(2, '向日葵', '🌻');
+      html += createLevelCard(3, '坚果墙', '🥜');
+      html += createLevelCard(4, '樱桃炸弹', '🍒');
+      html += createLevelCard(5, '寒冰射手', '❄️');
+
+      // 显示优势
+      html += '<h2 style="color: #667eea; margin-top: 30px;">💡 修改优势</h2>';
+      html += createCheckItem('玩家第1关就有攻击植物', true);
+      html += createCheckItem('可以主动防守，不用完全依赖小推车', true);
+      html += createCheckItem('学习曲线更合理：先攻后守', true);
+      html += createCheckItem('游戏体验更好，减少挫败感', true);
+
+      results.innerHTML = html;
+
+      // 更新状态
+      if (check1 && check2 && check3) {
+        status.innerHTML = '✅ 所有检查通过！植物解锁顺序已正确修改！';
+        status.className = 'status success';
+      } else {
+        status.innerHTML = '❌ 检查失败，请检查配置！';
+        status.className = 'status error';
+      }
+    }
+
+    // 页面加载时自动验证
+    window.addEventListener('load', verify);
+  </script>
+</body>
+</html>

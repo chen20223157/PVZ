@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>植物大战僵尸 - 调试版本 v2</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #222; color: #fff; font-family: Arial, sans-serif; }
+        #console {
+            background: #000;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        #console div {
+            margin: 2px 0;
+            padding: 2px;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .info { color: #74c0fc; }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        canvas {
+            border: 2px solid #fff;
+            margin: 10px 0;
+        }
+        .status {
+            padding: 10px;
+            background: #333;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🌱 植物大战僵尸 - 调试版本</h1>
+    <button id="startBtn">开始游戏</button>
+    <button id="resetBtn">重置游戏</button>
+
+    <div class="status" id="status">状态：等待开始</div>
+
+    <div id="console">
+        <div>[系统] 调试控制台已准备</div>
+    </div>
+
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
+
+    <script type="module">
+        const consoleEl = document.getElementById('console');
+        const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusEl = document.getElementById('status');
+
+        // 自定义日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${timestamp}] ${message}`;
+            consoleEl.appendChild(div);
+            consoleEl.scrollTop = consoleEl.scrollHeight;
+            console.log(message);
+        }
+
+        // 更新状态显示
+        function updateStatus(status) {
+            statusEl.textContent = `状态：${status}`;
+        }
+
+        let game = null;
+        let initialized = false;
+
+        startBtn.addEventListener('click', async function() {
+            if (game) {
+                log('游戏已经在运行！', 'info');
+                updateStatus('游戏中');
+                return;
+            }
+
+            startBtn.disabled = true;
+            log('开始初始化游戏...', 'info');
+            updateStatus('正在加载...');
+
+            try {
+                // 动态导入游戏模块
+                log('正在导入 Game 模块...', 'info');
+                const { Game } = await import('./Game.js');
+                log('✓ Game 模块导入成功', 'success');
+
+                // 创建画布
+                const canvas = document.getElementById('gameCanvas');
+                log('✓ 画布准备就绪', 'success');
+
+                // 创建游戏实例
+                game = new Game(canvas);
+                log('✓ 游戏实例创建成功', 'success');
+                log(`初始状态: ${game.state}`, 'info');
+
+                // 启动游戏循环
+                game.start();
+                log('✓ 游戏循环已启动', 'success');
+
+                updateStatus('游戏运行中');
+                initialized = true;
+
+            } catch (error) {
+                log(`❌ 错误: ${error.message}`, 'error');
+                log(`堆栈: ${error.stack}`, 'error');
+                updateStatus('初始化失败');
+
+                startBtn.disabled = false;
+            }
+        });
+
+        resetBtn.addEventListener('click', function() {
+            if (game) {
+                log('正在重置游戏...', 'info');
+                // 可以在这里添加清理逻辑
+                game = null;
+            }
+
+            // 清空控制台
+            consoleEl.innerHTML = '<div>[系统] 控制台已清空</div>';
+
+            startBtn.disabled = false;
+            updateStatus('等待开始');
+            initialized = false;
+
+            log('游戏已重置', 'info');
+        });
+
+        // 检查模块导入
+        try {
+            const moduleCheck = await import('./config.js');
+            log('✓ 配置模块正常', 'success');
+        } catch (error) {
+            log('❌ 配置模块导入失败', 'error');
+        }
+    </script>
+</body>
+</html>

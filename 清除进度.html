@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>清除游戏进度</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      padding: 50px;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    h1 {
+      color: #f5576c;
+      margin-bottom: 20px;
+      font-size: 32px;
+    }
+    .warning {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      color: #856404;
+    }
+    .info {
+      background: #d1ecf1;
+      border: 2px solid #17a2b8;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      color: #0c5460;
+    }
+    .success {
+      background: #d4edda;
+      border: 2px solid #28a745;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      color: #155724;
+      display: none;
+    }
+    button {
+      background: #f5576c;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #e04455;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+    }
+    button.secondary {
+      background: #6c757d;
+    }
+    button.secondary:hover {
+      background: #5a6268;
+    }
+    .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .step {
+      text-align: left;
+      margin: 15px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #f5576c;
+    }
+    .step-number {
+      display: inline-block;
+      background: #f5576c;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      margin-right: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🗑️</div>
+    <h1>清除游戏进度</h1>
+    
+    <div class="warning">
+      <strong>⚠️ 重要提示</strong><br>
+      由于修改了植物解锁顺序，需要清除旧的游戏进度才能使用新的配置。
+    </div>
+
+    <div class="info">
+      <strong>📋 操作说明</strong>
+      <div class="step">
+        <span class="step-number">1</span>
+        点击下方"清除进度"按钮
+      </div>
+      <div class="step">
+        <span class="step-number">2</span>
+        等待清除完成
+      </div>
+      <div class="step">
+        <span class="step-number">3</span>
+        点击"开始游戏"进入第1关
+      </div>
+      <div class="step">
+        <span class="step-number">4</span>
+        确认豌豆射手已解锁 ✅
+      </div>
+    </div>
+
+    <div class="success" id="successMessage">
+      <strong>✅ 清除成功！</strong><br>
+      游戏进度已重置，现在第1关默认解锁豌豆射手！
+    </div>
+
+    <button onclick="clearProgress()">🗑️ 清除进度</button>
+    <button class="secondary" onclick="window.location.href='index.html'">🎮 开始游戏</button>
+    <button class="secondary" onclick="checkProgress()">🔍 检查当前进度</button>
+
+    <div id="progressInfo" style="margin-top: 20px; text-align: left; background: #f8f9fa; padding: 15px; border-radius: 8px; display: none;">
+      <strong>当前进度：</strong>
+      <pre id="progressData" style="background: #fff; padding: 10px; border-radius: 5px; overflow-x: auto;"></pre>
+    </div>
+  </div>
+
+  <script>
+    function clearProgress() {
+      if (confirm('确定要清除所有游戏进度吗？此操作不可撤销！')) {
+        try {
+          // 清除关卡进度
+          localStorage.removeItem('levelProgress');
+          
+          // 清除其他可能的游戏数据
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.includes('level') || key.includes('plant') || key.includes('game'))) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+          
+          // 显示成功消息
+          document.getElementById('successMessage').style.display = 'block';
+          
+          // 3秒后自动刷新
+          setTimeout(() => {
+            alert('进度已清除！现在将刷新页面。');
+            location.reload();
+          }, 2000);
+        } catch (e) {
+          alert('清除失败：' + e.message);
+        }
+      }
+    }
+
+    function checkProgress() {
+      const progressInfo = document.getElementById('progressInfo');
+      const progressData = document.getElementById('progressData');
+      
+      try {
+        const saved = localStorage.getItem('levelProgress');
+        if (saved) {
+          const data = JSON.parse(saved);
+          progressData.textContent = JSON.stringify(data, null, 2);
+          progressInfo.style.display = 'block';
+        } else {
+          progressData.textContent = '没有保存的进度（这是正常的，表示将使用默认配置）';
+          progressInfo.style.display = 'block';
+        }
+      } catch (e) {
+        progressData.textContent = '读取失败：' + e.message;
+        progressInfo.style.display = 'block';
+      }
+    }
+
+    // 页面加载时显示当前进度
+    window.addEventListener('load', () => {
+      checkProgress();
+    });
+  </script>
+</body>
+</html>

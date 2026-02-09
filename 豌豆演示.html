@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>豌豆外观演示 v3.0.2</title>
+  <style>
+    body {
+      font-family: 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 18px;
+    }
+    .demo-section {
+      margin: 30px 0;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    .demo-title {
+      font-size: 24px;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    .pea-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 40px;
+      padding: 40px;
+      background: white;
+      border-radius: 10px;
+    }
+    .pea-demo {
+      text-align: center;
+      padding: 20px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-width: 200px;
+    }
+    .pea-label {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .pea-size {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.5);
+      border-radius: 5px;
+    }
+    .comparison {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin: 20px 0;
+    }
+    .comparison-item {
+      text-align: center;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .old-label {
+      color: #999;
+      font-size: 14px;
+    }
+    .new-label {
+      color: #28a745;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 30px;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px;
+      transition: all 0.3s;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .feature-list {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .feature-item {
+      padding: 10px;
+      margin: 8px 0;
+      background: #e7f3ff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .feature-icon {
+      font-size: 24px;
+      margin-right: 15px;
+    }
+    .info-box {
+      background: #fff3cd;
+      border: 2px solid #ffc107;
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🌱 豌豆外观演示</h1>
+    <div class="subtitle">v3.0.2 - 豌豆大小增大一倍 & 寒冰豌豆改为蓝色</div>
+
+    <div class="info-box">
+      <strong>✨ 更新内容</strong><br>
+      • 所有豌豆大小增大一倍（半径：5→10，溅射：8→16）<br>
+      • 寒冰豌豆改为深蓝色（#00BFFF → #0066FF）<br>
+      • 增强视觉效果：光晕、冰晶、高光
+    </div>
+
+    <!-- 新豌豆展示 -->
+    <div class="demo-section">
+      <div class="demo-title">🎨 新豌豆外观（当前版本）</div>
+      <div class="pea-container">
+        <div class="pea-demo">
+          <div class="pea-label">🌱 普通豌豆</div>
+          <div class="pea-size">半径：10px（绿色）</div>
+          <canvas id="normalPeaNew" width="100" height="100"></canvas>
+        </div>
+        <div class="pea-demo">
+          <div class="pea-label">❄️ 寒冰豌豆</div>
+          <div class="pea-size">半径：10px（深蓝色）</div>
+          <canvas id="slowPeaNew" width="100" height="100"></canvas>
+        </div>
+        <div class="pea-demo">
+          <div class="pea-label">💥 溅射豌豆</div>
+          <div class="pea-size">半径：16px（红色）</div>
+          <canvas id="splashPeaNew" width="100" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- 对比展示 -->
+    <div class="demo-section">
+      <div class="demo-title">📊 大小对比</div>
+      <div class="comparison">
+        <div class="comparison-item">
+          <div class="old-label">旧版本（半径5px）</div>
+          <canvas id="oldPea" width="80" height="80"></canvas>
+        </div>
+        <div class="comparison-item">
+          <div class="new-label">新版本（半径10px）✨</div>
+          <canvas id="newPea" width="80" height="80"></canvas>
+        </div>
+      </div>
+      <div style="text-align: center; color: #28a745; font-weight: bold; font-size: 20px;">
+        ⬆️ 大了一倍！更清晰，更好看！
+      </div>
+    </div>
+
+    <!-- 寒冰豌豆颜色对比 -->
+    <div class="demo-section">
+      <div class="demo-title">🔵 寒冰豌豆颜色对比</div>
+      <div class="comparison">
+        <div class="comparison-item">
+          <div class="old-label">旧版本（浅蓝色 #00BFFF）</div>
+          <canvas id="oldSlowPea" width="80" height="80"></canvas>
+        </div>
+        <div class="comparison-item">
+          <div class="new-label">新版本（深蓝色 #0066FF）✨</div>
+          <canvas id="newSlowPea" width="80" height="80"></canvas>
+        </div>
+      </div>
+      <div style="text-align: center; color: #0066FF; font-weight: bold; font-size: 20px;">
+        ⬆️ 更蓝！更有冰冻感！
+      </div>
+    </div>
+
+    <!-- 特性列表 -->
+    <div class="demo-section">
+      <div class="demo-title">✨ 视觉效果增强</div>
+      <div class="feature-list">
+        <div class="feature-item">
+          <span class="feature-icon">🌱</span>
+          <span><strong>普通豌豆：</strong>绿色，半径10px，带浅绿色高光</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">❄️</span>
+          <span><strong>寒冰豌豆：</strong>深蓝色，半径10px，蓝色光晕+6条冰晶光芒</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">💥</span>
+          <span><strong>溅射豌豆：</strong>红色，半径16px，溅射范围指示器</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">⚡</span>
+          <span><strong>视觉冲击：</strong>更大更清晰，攻击感更强</span>
+        </div>
+        <div class="feature-item">
+          <span class="feature-icon">🎨</span>
+          <span><strong>区分度高：</strong>三种豌豆颜色和大小区分明显</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="button-container">
+      <button onclick="window.location.href='index.html'">🎮 开始游戏体验</button>
+      <button onclick="animatePeas()" style="background: #28a745;">▶️ 播放动画</button>
+      <button onclick="location.reload()" style="background: #6c757d;">🔄 重新加载</button>
+    </div>
+  </div>
+
+  <script>
+    // 绘制普通豌豆（新版）
+    function drawNormalPeaNew(ctx, x, y) {
+      const radius = 10;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      // 主体
+      ctx.fillStyle = '#00FF00';
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 高光
+      ctx.fillStyle = '#90EE90';
+      ctx.beginPath();
+      ctx.arc(x - 3, y - 3, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 绘制寒冰豌豆（新版）
+    function drawSlowPeaNew(ctx, x, y) {
+      const radius = 10;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      // 外层光晕
+      ctx.fillStyle = 'rgba(0, 102, 255, 0.3)';
+      ctx.beginPath();
+      ctx.arc(x, y, radius + 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 主体
+      ctx.fillStyle = '#0066FF';
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 冰晶效果
+      ctx.strokeStyle = '#CCE6FF';
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(angle) * (radius + 5), y + Math.sin(angle) * (radius + 5));
+        ctx.stroke();
+      }
+      
+      // 高光
+      ctx.fillStyle = '#E0F2FF';
+      ctx.beginPath();
+      ctx.arc(x - 3, y - 3, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 绘制溅射豌豆（新版）
+    function drawSplashPeaNew(ctx, x, y) {
+      const radius = 16;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      // 主体
+      ctx.fillStyle = '#FF6347';
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 溅射范围
+      ctx.strokeStyle = '#FF6347';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.arc(x, y, 30, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+      
+      // 高光
+      ctx.fillStyle = '#FF9999';
+      ctx.beginPath();
+      ctx.arc(x - 3, y - 3, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 绘制旧版豌豆（半径5）
+    function drawOldPea(ctx, x, y) {
+      const radius = 5;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      ctx.fillStyle = '#00FF00';
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#90EE90';
+      ctx.beginPath();
+      ctx.arc(x - 2, y - 2, 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 绘制旧版寒冰豌豆
+    function drawOldSlowPea(ctx, x, y) {
+      const radius = 5;
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      
+      ctx.fillStyle = '#00BFFF';  // 旧颜色
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // 简单冰晶
+      ctx.strokeStyle = '#E0FFFF';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + Math.cos(angle) * 8, y + Math.sin(angle) * 8);
+        ctx.stroke();
+      }
+    }
+
+    // 初始化所有画布
+    function init() {
+      // 新版豌豆
+      const normalPeaNew = document.getElementById('normalPeaNew').getContext('2d');
+      const slowPeaNew = document.getElementById('slowPeaNew').getContext('2d');
+      const splashPeaNew = document.getElementById('splashPeaNew').getContext('2d');
+      
+      drawNormalPeaNew(normalPeaNew, 50, 50);
+      drawSlowPeaNew(slowPeaNew, 50, 50);
+      drawSplashPeaNew(splashPeaNew, 50, 50);
+      
+      // 对比
+      const oldPea = document.getElementById('oldPea').getContext('2d');
+      const newPea = document.getElementById('newPea').getContext('2d');
+      drawOldPea(oldPea, 40, 40);
+      drawNormalPeaNew(newPea, 40, 40);
+      
+      // 寒冰豌豆对比
+      const oldSlowPea = document.getElementById('oldSlowPea').getContext('2d');
+      const newSlowPea = document.getElementById('newSlowPea').getContext('2d');
+      drawOldSlowPea(oldSlowPea, 40, 40);
+      drawSlowPeaNew(newSlowPea, 40, 40);
+    }
+
+    // 播放动画
+    function animatePeas() {
+      let rotation = 0;
+      const interval = setInterval(() => {
+        rotation += 0.1;
+        
+        const normalPeaNew = document.getElementById('normalPeaNew').getContext('2d');
+        const slowPeaNew = document.getElementById('slowPeaNew').getContext('2d');
+        const splashPeaNew = document.getElementById('splashPeaNew').getContext('2d');
+        
+        normalPeaNew.save();
+        normalPeaNew.translate(50, 50);
+        normalPeaNew.rotate(rotation);
+        normalPeaNew.translate(-50, -50);
+        drawNormalPeaNew(normalPeaNew, 50, 50);
+        normalPeaNew.restore();
+        
+        slowPeaNew.save();
+        slowPeaNew.translate(50, 50);
+        slowPeaNew.rotate(rotation);
+        slowPeaNew.translate(-50, -50);
+        drawSlowPeaNew(slowPeaNew, 50, 50);
+        slowPeaNew.restore();
+        
+        splashPeaNew.save();
+        splashPeaNew.translate(50, 50);
+        splashPeaNew.rotate(rotation);
+        splashPeaNew.translate(-50, -50);
+        drawSplashPeaNew(splashPeaNew, 50, 50);
+        splashPeaNew.restore();
+        
+        if (rotation > Math.PI * 4) {
+          clearInterval(interval);
+          init();
+        }
+      }, 50);
+    }
+
+    // 页面加载时初始化
+    window.addEventListener('load', init);
+  </script>
+</body>
+</html>
